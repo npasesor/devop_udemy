@@ -1,0 +1,23 @@
+#persistence volumen (PV) is a piece of storage that have idependent lifecycle from pods
+#thees preserve data throug restartin, rescheduling and even deleting pods
+#PersistenceVolumeCalin is a request for storage by the user that can be fulfilled by teh PV
+kind: PersistentVolume #*se borra la app pero no la BD
+#version of ApiServer on control panel node (/api/v1) check using kubectl api-versions
+apiVersion: v1
+metadata:
+  name: postgres-volume
+  labels:
+  #it is aplugin suport many luke amazon EBS azue disk etc. local = local storage devices mounted on nodes.
+    type: local #* almacenamiento local 
+    app: postgres
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+#many pods on scheduled on differents nodes can read and write
+  accessModes:
+    - ReadWriteMany
+
+#path on cluster's node
+  hostPath:
+    path: "/run/media/willy/ceee75d4-ed7e-41eb-b909-f83fa5e7a117/.devops/Jenkins/devop1/data/" #? esta es la direccion donde se almacenaran algunas cosas

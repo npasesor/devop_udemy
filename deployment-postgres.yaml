@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+  labels:
+    app: postgres
+spec: #?especificacion se detallan todas las imagenes y los pods que utilizaremos
+#Pods number replicates 
+  replicas: 1
+  #Define how the Deployment identify the pods that it could manage
+  selector:
+    matchLabels: #se identificar pods (app:postgres)
+      app: postgres
+      #pod template specification
+  template:
+    metadata:
+    #define teh labels for all pods
+      labels:
+        app: postgres
+    spec: #identificar al contenedor
+      containers:
+        - name: postgres
+          image: postgres:latest
+          imagePullPolicy: IfNotPresent
+          #open the port to allow send and receive traffic in teh container
+          ports:
+            - containerPort: 5432
+            #read envars from secret file
+          envFrom:
+            - secretRef:
+                name: postgres-secret
+          volumeMounts:
+          #This is the path in the container on which the mounting will take place.
+            - mountPath: /run/media/willy/ceee75d4-ed7e-41eb-b909-f83fa5e7a117/.devops/Jenkins/devop1/data/
+              name: puentedb
+            - mountPath: /docker-entrypoint-initdb.d
+              name : init-script
+      volumes:
+        - name: puentedb
+          persistentVolumeClaim:
+            claimName: postgres-claim
+        - name: init-script
+          configMap:
+            name: postgres-init-script-configmap
